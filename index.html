@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulación EDO · Adopción y Sostenibilidad de Refugios de Mascotas</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<nav><div class="wrap">
+  <b>🐾 EDO · Refugios</b>
+  <a href="#contexto">Contexto</a><a href="#modelo">Modelo</a><a href="#metodos">Métodos</a>
+  <a href="#resultados">Resultados</a><a href="#dinamica">Dinámica</a><a href="#tabla">Tabla</a>
+  <a href="#convergencia">Convergencia</a><a href="#escenarios">Escenarios</a><a href="#analisis">Análisis</a>
+</div></nav>
+
+<!-- ================= HERO ================= -->
+<header class="hero">
+  <div class="wrap">
+    <span class="tag">Modelación · Ecuaciones Diferenciales · Métodos Numéricos</span>
+    <h1>Simulación EDO del Modelo de <span>Adopción</span> y Sostenibilidad de Refugios de Mascotas</h1>
+    <p class="lead">Ecuación logística aplicada a la evolución de la población acumulada de mascotas adoptadas durante 30 días de difusión comunitaria. Comparamos Heun (RK2) y Runge-Kutta 4 contra la solución analítica exacta.</p>
+    <div class="btns">
+      <a class="btn primary" href="#resultados">Ver resultados</a>
+      <a class="btn ghost" href="#analisis">Ir al análisis profundo</a>
+    </div>
+  </div>
+</header>
+
+<div class="wrap" style="background:transparent">
+  <div class="kpis" id="kpis"></div>
+</div>
+
+<!-- ================= CONTEXTO ================= -->
+<section class="light" id="contexto" style="padding-top:60px">
+  <div class="wrap">
+    <div class="kicker">01 · Planteamiento</div>
+    <h2>Contexto del <em>desafío</em></h2>
+    <p class="sub">Los refugios operan cerca de su límite físico. Anticipar cuándo se saturan, y cuánto ayuda una campaña de difusión, permite decidir con datos y no con urgencia.</p>
+    <div class="grid g3">
+      <div class="card accent"><h3>Población beneficiaria</h3><p>Refugios comunitarios de animales rescatados y la sociedad civil local interesada en el bienestar animal y la salud preventiva.</p></div>
+      <div class="card accent"><h3>Problema específico</h3><p>Saturación, sobrepoblación y estrés de infraestructura por falta de planificación entre tasas de adopción e ingresos/rescates continuos. Sin un modelo predictivo no se puede dimensionar el impacto de las campañas.</p></div>
+      <div class="card accent"><h3>Relevancia</h3><p>Anticipar el colapso del espacio físico y optimizar recursos logísticos mediante concienciación y adopción temporal o definitiva.</p></div>
+    </div>
+    <div class="card" style="margin-top:18px;border-left:5px solid #111">
+      <h3>❓ Pregunta concreta</h3>
+      <p>¿Cómo evoluciona la población acumulada de mascotas adoptadas en un refugio a lo largo de <b>30 días</b> bajo un programa continuo de difusión comunitaria, y qué tan precisas resultan las aproximaciones numéricas de <b>Heun (RK2)</b> y <b>Runge-Kutta de 4.º orden (RK4)</b> frente a la solución analítica exacta?</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= MODELO ================= -->
+<section class="dark2" id="modelo">
+  <div class="wrap">
+    <div class="kicker">02 · Modelo matemático</div>
+    <h2>Ecuación logística de <em>crecimiento limitado</em></h2>
+    <p class="sub">La adopción crece lento al inicio (pocas mascotas visibles), se acelera cuando la difusión se consolida y se frena al acercarse a la capacidad de carga del refugio.</p>
+    <div class="grid g2">
+      <div class="card">
+        <div class="eq">dy/dt = r · y · (1 − y / K),&nbsp;&nbsp; y(0) = y₀</div>
+        <div class="eq">y(t) = K / ( 1 + ((K − y₀)/y₀) · e<sup>−r t</sup> )</div>
+        <ul>
+          <li><b>t</b>: tiempo en días (t ≥ 0).</li>
+          <li><b>y(t)</b>: mascotas acumuladas adoptadas / integradas con éxito.</li>
+          <li><b>K</b>: capacidad de carga (200 mascotas).</li>
+          <li><b>r</b>: efectividad intrínseca de la campaña (0.15 días⁻¹).</li>
+          <li><b>y₀</b>: condición inicial (10 mascotas).</li>
+          <li>Intervalo: t ∈ [0, 30], paso h = 0.96.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>⚙️ Parámetros interactivos</h3>
+        <p style="color:#aaa;font-size:.88rem;margin-bottom:14px">Modifica cualquier valor: gráficas, tablas y análisis se recalculan al instante.</p>
+        <div class="ctrl">
+          <div><label>K (capacidad)</label><input id="K" type="number" value="200" min="20" step="10"></div>
+          <div><label>r (días⁻¹)</label><input id="r" type="number" value="0.15" min="0.01" step="0.01"></div>
+          <div><label>y₀</label><input id="y0" type="number" value="10" min="1" step="1"></div>
+          <div><label>h (paso)</label><input id="h" type="number" value="0.96" min="0.01" step="0.01"></div>
+          <div><label>T (días)</label><input id="T" type="number" value="30" min="5" step="1"></div>
+        </div>
+        <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn primary" onclick="render()">Recalcular</button>
+          <button class="btn ghost" onclick="resetP()">Valores del desafío</button>
+        </div>
+        <p class="note" id="gridNote"></p>
+      </div>
+    </div>
+    <div class="card" style="margin-top:18px">
+      <h3>🔎 Propiedades analíticas clave de la logística</h3>
+      <div class="grid g3" id="props"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= MÉTODOS ================= -->
+<section class="light2" id="metodos">
+  <div class="wrap">
+    <div class="kicker">03 · Métodos numéricos</div>
+    <h2>Heun (RK2) vs. <em>Runge-Kutta 4</em></h2>
+    <p class="sub">Con f(t,y) = r·y·(1 − y/K) se avanza de yₙ a yₙ₊₁ con paso h. La diferencia está en cuántas pendientes se evalúan y cómo se combinan.</p>
+    <div class="grid g2">
+      <div class="card accent">
+        <h3>Método de Heun (predictor–corrector, orden 2)</h3>
+        <div class="eq sm">k₁ = f(tₙ, yₙ)<br>k₂ = f(tₙ + h, yₙ + h·k₁)<br>yₙ₊₁ = yₙ + (h/2)(k₁ + k₂)</div>
+        <ul><li>2 evaluaciones de f por paso.</li><li>Error local O(h³), error global O(h²).</li><li>Promedia la pendiente inicial y la final (regla del trapecio).</li></ul>
+      </div>
+      <div class="card accent">
+        <h3>Runge-Kutta clásico (orden 4)</h3>
+        <div class="eq sm">k₁ = f(tₙ, yₙ)<br>k₂ = f(tₙ + h/2, yₙ + h·k₁/2)<br>k₃ = f(tₙ + h/2, yₙ + h·k₂/2)<br>k₄ = f(tₙ + h, yₙ + h·k₃)<br>yₙ₊₁ = yₙ + (h/6)(k₁ + 2k₂ + 2k₃ + k₄)</div>
+        <ul><li>4 evaluaciones de f por paso.</li><li>Error local O(h⁵), error global O(h⁴).</li><li>Ponderación tipo Simpson de cuatro pendientes.</li></ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= RESULTADOS ================= -->
+<section class="dark" id="resultados">
+  <div class="wrap">
+    <div class="kicker">04 · Resultados</div>
+    <h2>Evolución de la <em>población adoptada</em></h2>
+    <p class="sub">Solución exacta (línea continua) frente a las aproximaciones numéricas en los nodos de la malla.</p>
+    <div class="card"><div class="chartbox tall"><canvas id="c1"></canvas></div>
+      <p class="note">Líneas punteadas: capacidad K y umbral de alerta (80 % de K).</p></div>
+    <div class="grid g2" style="margin-top:18px">
+      <div class="card"><h3>Error absoluto (escala logarítmica)</h3><div class="chartbox"><canvas id="c2"></canvas></div>
+        <p class="note">La escala log revela la diferencia de órdenes de magnitud entre RK2 y RK4.</p></div>
+      <div class="card"><h3>Error con signo: y_num − y_exacta</h3><div class="chartbox"><canvas id="c3"></canvas></div>
+        <p class="note">Indica si el método sobrestima (&gt;0) o subestima (&lt;0) las adopciones.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= DINÁMICA ================= -->
+<section class="light" id="dinamica">
+  <div class="wrap">
+    <div class="kicker">05 · Dinámica del sistema</div>
+    <h2>Ritmo de adopción y <em>plano de fase</em></h2>
+    <p class="sub">La derivada dy/dt es el número de adopciones por día. Su máximo ocurre en el punto de inflexión (y = K/2), el momento de mayor presión logística y mayor impacto de la campaña.</p>
+    <div class="grid g2">
+      <div class="card"><h3>Adopciones por día: dy/dt vs t</h3><div class="chartbox"><canvas id="c4"></canvas></div></div>
+      <div class="card"><h3>Plano de fase: dy/dt vs y</h3><div class="chartbox"><canvas id="c5"></canvas></div>
+        <p class="note">Parábola con raíces en y = 0 (equilibrio inestable) y y = K (equilibrio estable).</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= TABLA ================= -->
+<section class="light2" id="tabla" style="padding-top:20px">
+  <div class="wrap">
+    <div class="kicker">06 · Datos</div>
+    <h2>Tabla de <em>valores y errores</em></h2>
+    <p class="sub">Valores en cada nodo de la malla. Descarga los datos en CSV para tu informe.</p>
+    <button class="btn primary" style="margin-bottom:14px" onclick="downloadCSV()">⬇ Descargar CSV</button>
+    <div class="tw"><table id="tbl"></table></div>
+  </div>
+</section>
+
+<!-- ================= CONVERGENCIA ================= -->
+<section class="dark2" id="convergencia">
+  <div class="wrap">
+    <div class="kicker">07 · Análisis de convergencia</div>
+    <h2>¿Se cumple el <em>orden teórico</em>?</h2>
+    <p class="sub">Se repite la integración con N = 10, 20, 40… pasos (h = T/N) y se mide el error máximo en la malla. La pendiente en escala log-log debe ser 2 para Heun y 4 para RK4.</p>
+    <div class="grid g2">
+      <div class="card"><div class="chartbox tall"><canvas id="c6"></canvas></div></div>
+      <div class="card"><div class="tw" style="max-height:440px"><table id="tblConv"></table></div>
+        <p class="note">p = log₂(error anterior / error actual): orden de convergencia observado.</p></div>
+    </div>
+    <div class="card" style="margin-top:18px"><h3>💰 Eficiencia computacional</h3><div id="eff"></div></div>
+  </div>
+</section>
+
+<!-- ================= ESCENARIOS ================= -->
+<section class="light" id="escenarios">
+  <div class="wrap">
+    <div class="kicker">08 · Escenarios de campaña</div>
+    <h2>Sensibilidad a la <em>efectividad r</em></h2>
+    <p class="sub">¿Qué pasa si la campaña es menos o más efectiva? Curvas exactas para distintos valores de r, manteniendo K y y₀.</p>
+    <div class="grid g2">
+      <div class="card"><div class="chartbox tall"><canvas id="c7"></canvas></div></div>
+      <div class="card"><div class="tw" style="max-height:440px"><table id="tblSc"></table></div>
+        <p class="note">t₅₀, t₈₀ y t₉₀: días para alcanzar 50 %, 80 % y 90 % de K (fórmula exacta t = ln[A·p/(1−p)]/r, con A = (K−y₀)/y₀).</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ANÁLISIS ================= -->
+<section class="dark" id="analisis">
+  <div class="wrap">
+    <div class="kicker">09 · Análisis profundo</div>
+    <h2>Hallazgos y <em>respuesta a la pregunta</em></h2>
+    <p class="sub">Texto generado a partir de los resultados actuales de la simulación.</p>
+    <div id="findings"></div>
+
+    <div class="grid g2" style="margin-top:30px">
+      <div class="card"><h3>🚦 Semáforo de capacidad</h3><div id="semaforo"></div></div>
+      <div class="card"><h3>🧭 Recomendaciones operativas</h3><div id="reco"></div></div>
+    </div>
+
+    <div class="card" style="margin-top:18px"><h3>⚖️ Limitaciones del modelo y extensiones</h3>
+      <ul>
+        <li><b>Interpretación de y(t):</b> el desafío la define como adopciones acumuladas y, a la vez, población inicial del refugio. El modelo la trata como una única población que crece hacia K. Conviene validarlo con datos reales del refugio.</li>
+        <li><b>Sin ingresos explícitos:</b> los rescates continuos no aparecen. Una extensión natural es dy/dt = r·y·(1 − y/K) − h·y + λ, con λ = tasa de ingreso y h = tasa de devolución o salida.</li>
+        <li><b>Parámetros constantes:</b> r real varía con festividades, redes sociales y clima. Podría modelarse r(t).</li>
+        <li><b>Determinista:</b> no incluye aleatoriedad en las adopciones diarias; para conteos pequeños convendría un modelo estocástico.</li>
+        <li><b>Calibración:</b> r y K pueden estimarse por mínimos cuadrados no lineales sobre los conteos observados.</li>
+      </ul>
+    </div>
+
+    <div class="conclusion" style="margin-top:26px" id="concl"></div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">Simulación EDO · Modelo logístico · Heun (RK2) y Runge-Kutta 4 · Imagen de cabecera: Unsplash · Chart.js</div>
+</footer>
+
+<script src="app.js">
+
+</script>
+</body>
+</html>
